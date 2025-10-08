@@ -432,7 +432,7 @@ export default function DashboardHome() {
                   <BookOpen className="h-4 w-4 text-blue-600 mb-1" />
                   <span className="text-xs text-muted-foreground">Sessions</span>
                   <AnimatedCounter
-                    value={Object.values(stats.studySessions).reduce((total: number, session: any) => total + (session.count || 0), 0)}
+                    value={Object.values(stats.studySessions).reduce((total: number, session: DailySession) => total + (session.count || 0), 0)}
                     className="text-sm font-bold text-card-foreground"
                   />
                 </div>

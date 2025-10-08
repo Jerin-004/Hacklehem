@@ -3,11 +3,30 @@
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BookOpen, Brain, FileText, Home, Timer, Users, LogOut, PanelLeftClose, PanelLeft, FileUp } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { 
+  BookOpen, 
+  Brain, 
+  FileText, 
+  Home, 
+  Timer, 
+  Users, 
+  LogOut, 
+  Menu, 
+  X, 
+  FileUp,
+  Search,
+  StickyNote,
+  Target,
+  Sparkles,
+  ChevronRight,
+  Zap
+} from "lucide-react"
 import { signOut, useSession } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 interface NavItem {
   label: string;
@@ -36,14 +55,17 @@ export function DashboardNav({ className, onCollapse, ...props }: DashboardNavPr
     onCollapse?.(!isCollapsed);
   }
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
   const navSections: NavSection[] = [
     {
-      title: "General",
+      title: "Dashboard",
       items: [
         {
           label: 'Home',
           icon: Home,
           href: '/home',
+          badge: 'New'
         },
         {
           label: 'Profile',
@@ -53,31 +75,34 @@ export function DashboardNav({ className, onCollapse, ...props }: DashboardNavPr
       ]
     },
     {
-      title: "Study Tools", 
+      title: "AI Study Tools", 
       items: [
         {
-          label: 'Planner',
-          icon: BookOpen,
+          label: 'AI Planner',
+          icon: Target,
           href: '/study-plan',
+          badge: 'AI'
         },
         {
           label: 'Resources',
-          icon: Brain,
+          icon: Search,
           href: '/resources',
+          badge: 'Curated'
         },
         {
-          label: 'Scriba',
-          icon: FileUp,
+          label: 'PDF Chat',
+          icon: FileText,
           href: '/pdf',
+          badge: 'Pro'
         },
         {
-          label: 'Timer',
+          label: 'Focus Timer',
           icon: Timer,
           href: '/timer',
         },
         {
-          label: 'Notes',
-          icon: FileText,
+          label: 'Smart Notes',
+          icon: StickyNote,
           href: '/notes',
         },
       ]
@@ -86,10 +111,10 @@ export function DashboardNav({ className, onCollapse, ...props }: DashboardNavPr
       title: "Account",
       items: [
         {
-          label: 'Log out',
+          label: 'Sign Out',
           icon: LogOut,
           href: '#',
-          onClick: () => signOut({ callbackUrl: '/' })
+          onClick: () => signOut({ callbackUrl: '/signin' })
         }
       ]
     }
