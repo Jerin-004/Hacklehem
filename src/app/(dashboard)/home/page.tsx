@@ -151,7 +151,7 @@ export default function DashboardHome() {
   }
 
   const totalStudyHours = Object.values(stats.studySessions).reduce(
-    (total, session) => total + (session.totalDuration || 0),
+    (total: number, session: DailySession) => total + (session.totalDuration || 0),
     0
   ) / 3600; // Convert to hours
 
