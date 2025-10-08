@@ -104,6 +104,17 @@ export function DashboardNav({ className, onCollapse }: DashboardNavProps) {
       ]
     },
     {
+      title: "System",
+      items: [
+        {
+          label: 'Design System',
+          icon: Sparkles,
+          href: '/design-system',
+          badge: 'New'
+        },
+      ]
+    },
+    {
       title: "Account",
       items: [
         {
