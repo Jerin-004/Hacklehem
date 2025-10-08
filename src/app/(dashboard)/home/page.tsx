@@ -1,10 +1,22 @@
 "use client"
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { ContributionCalendar } from 'react-contribution-calendar';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useSession } from 'next-auth/react';
 import PacmanLoader from 'react-spinners/PacmanLoader';
+import { 
+  TrendingUp, 
+  Calendar, 
+  Target, 
+  Clock, 
+  Award,
+  BookOpen,
+  BarChart3,
+  Activity
+} from 'lucide-react';
 
 interface StudySession {
   duration: number;
@@ -136,93 +148,286 @@ export default function DashboardHome() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <PacmanLoader color="#538B81" />
+      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center space-y-4"
+        >
+          <PacmanLoader color="#538B81" size={20} />
+          <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
+        </motion.div>
       </div>
     );
   }
 
+  const totalStudyHours = Object.values(stats.studySessions).reduce(
+    (total, session) => total + (session.totalDuration || 0),
+    0
+  ) / 3600; // Convert to hours
+
+  const weeklyGoal = 25; // hours per week
+  const weeklyProgress = (totalStudyHours / weeklyGoal) * 100;
+
   return (
-    <div className="space-y-4 px-2 py-4 sm:p-4 md:space-y-8 md:p-6 lg:p-8 bg-background">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-lg sm:text-xl font-bold text-foreground md:text-2xl lg:text-3xl">
-          {session?.user?.name ? `${session.user.name}'s ` : ''}Study Activity
-        </h1>
-        <span className="text-xs text-muted-foreground sm:text-sm">
-          Last updated: {new Date().toLocaleDateString()}
-        </span>
-      </div>
-
-      <Card className="bg-card border-2 border-border">
-        <CardHeader className="p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-sm sm:text-base font-semibold md:text-lg lg:text-xl text-card-foreground">
-            Your Study Contributions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[280px] p-1 sm:p-2 md:min-w-full md:p-4">
-              <ContributionCalendar
-                data={studyData}
-                dateOptions={{
-                  start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                  end: new Date().toISOString().split('T')[0],
-                  daysOfTheWeek: isMobile ? ['S', 'M', 'T', 'W', 'T', 'F', 'S'] : isTablet ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                  startsOnSunday: true,
-                  includeBoundary: true,
-                }}
-                styleOptions={{
-                  theme: customTheme,
-                  cx: isMobile ? 8 : isTablet ? 12 : 18,
-                  cy: isMobile ? 10 : isTablet ? 14 : 20,
-                  cr: isMobile ? 2.5 : isTablet ? 3.5 : 4,
-                  textColor: 'var(--foreground)'
-                }}
-                visibilityOptions={{
-                  hideDescription: isMobile || isTablet,
-                  hideMonthLabels: isMobile,
-                  hideDayLabels: isMobile,
-                }}
-                onCellClick={(e) => {
-                  const cellData = JSON.parse(e.currentTarget.getAttribute('data-cell') || '{}');
-                  if (cellData?.data?.count) {
-                    console.log(`${cellData.data.details}`);
-                  }
-                }}
-                scroll={false}
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 lg:px-12">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground md:text-4xl lg:text-5xl tracking-tight">
+              Welcome back{session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}! 👋
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Here's your learning journey overview
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="flex items-center gap-2"
+          >
+            <Activity className="h-4 w-4 text-primary" />
+            <span className="text-xs text-muted-foreground sm:text-sm">
+              Last updated: {new Date().toLocaleDateString()}
+            </span>
+          </motion.div>
+        </motion.div>
 
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-card border-2 border-border">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg text-card-foreground">Current Streak</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-            <p className="text-lg sm:text-xl font-bold md:text-2xl lg:text-3xl text-card-foreground">{stats.currentStreak} days</p>
-          </CardContent>
-        </Card>
+        {/* Quick Stats Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+          className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground font-medium text-sm">Current Streak</p>
+                  <p className="text-3xl font-bold text-card-foreground">{stats.currentStreak}</p>
+                  <p className="text-xs text-muted-foreground">days</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-xl">
+                  <Target className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-card border-2 border-border">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg text-card-foreground">Total Study Days</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-            <p className="text-lg sm:text-xl font-bold md:text-2xl lg:text-3xl text-card-foreground">{stats.totalDays} days</p>
-          </CardContent>
-        </Card>
+          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground font-medium text-sm">Total Hours</p>
+                  <p className="text-3xl font-bold text-card-foreground">{Math.round(totalStudyHours)}</p>
+                  <p className="text-xs text-muted-foreground">hours studied</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl">
+                  <Clock className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-card border-2 border-border sm:col-span-2 lg:col-span-1">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg text-card-foreground">Best Streak</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0 md:p-6 md:pt-0">
-            <p className="text-lg sm:text-xl font-bold md:text-2xl lg:text-3xl text-card-foreground">{stats.bestStreak} days</p>
-          </CardContent>
-        </Card>
+          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground font-medium text-sm">Study Days</p>
+                  <p className="text-3xl font-bold text-card-foreground">{stats.totalDays}</p>
+                  <p className="text-xs text-muted-foreground">total days</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl">
+                  <Calendar className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground font-medium text-sm">Best Streak</p>
+                  <p className="text-3xl font-bold text-card-foreground">{stats.bestStreak}</p>
+                  <p className="text-xs text-muted-foreground">days</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl">
+                  <Award className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Weekly Progress */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="grid gap-6 lg:grid-cols-3"
+        >
+          <Card className="lg:col-span-2 bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Study Activity
+                </CardTitle>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  Last 365 days
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[280px] p-4 md:min-w-full">
+                  <ContributionCalendar
+                    data={studyData}
+                    dateOptions={{
+                      start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      end: new Date().toISOString().split('T')[0],
+                      daysOfTheWeek: isMobile ? ['S', 'M', 'T', 'W', 'T', 'F', 'S'] : isTablet ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                      startsOnSunday: true,
+                      includeBoundary: true,
+                    }}
+                    styleOptions={{
+                      theme: customTheme,
+                      cx: isMobile ? 8 : isTablet ? 12 : 18,
+                      cy: isMobile ? 10 : isTablet ? 14 : 20,
+                      cr: isMobile ? 2.5 : isTablet ? 3.5 : 4,
+                      textColor: 'var(--foreground)'
+                    }}
+                    visibilityOptions={{
+                      hideDescription: isMobile || isTablet,
+                      hideMonthLabels: isMobile,
+                      hideDayLabels: isMobile,
+                    }}
+                    onCellClick={(e: any) => {
+                      const cellData = JSON.parse(e.currentTarget.getAttribute('data-cell') || '{}');
+                      if (cellData?.data?.count) {
+                        console.log(`${cellData.data.details}`);
+                      }
+                    }}
+                    scroll={false}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Weekly Goal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-medium">{Math.round(weeklyProgress)}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(weeklyProgress, 100)}%` }}
+                    transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {Math.round(totalStudyHours)} of {weeklyGoal} hours this week
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Study Sessions</span>
+                  </div>
+                  <span className="text-sm font-bold">
+                    {Object.values(stats.studySessions).reduce((total: number, session: any) => total + (session.count || 0), 0)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Active Days</span>
+                  </div>
+                  <span className="text-sm font-bold">{stats.totalDays}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Achievements Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+        >
+          <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                Recent Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {stats.currentStreak >= 7 && (
+                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
+                    <div className="p-2 bg-yellow-500/20 rounded-full">
+                      <Award className="h-4 w-4 text-yellow-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Week Warrior</p>
+                      <p className="text-xs text-muted-foreground">7+ day streak</p>
+                    </div>
+                  </div>
+                )}
+                
+                {totalStudyHours >= 50 && (
+                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+                    <div className="p-2 bg-blue-500/20 rounded-full">
+                      <Clock className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Time Master</p>
+                      <p className="text-xs text-muted-foreground">50+ hours studied</p>
+                    </div>
+                  </div>
+                )}
+
+                {stats.totalDays >= 30 && (
+                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
+                    <div className="p-2 bg-green-500/20 rounded-full">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Monthly Champion</p>
+                      <p className="text-xs text-muted-foreground">30+ study days</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
