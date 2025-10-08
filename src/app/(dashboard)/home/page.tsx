@@ -3,15 +3,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ContributionCalendar } from 'react-contribution-calendar';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
 import { ProgressRing } from "@/components/ui/progress-ring";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { GlassCard } from "@/components/ui/glass-card";
 import { TrendIndicator } from "@/components/ui/trend-indicator";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { FullPageLoader } from "@/components/ui/professional-loader";
 import { useSession } from 'next-auth/react';
-import PacmanLoader from 'react-spinners/PacmanLoader';
 import { 
   TrendingUp, 
   Calendar, 
@@ -66,14 +66,7 @@ interface SessionData {
   lastStudyDate: string;
 }
 
-// Custom theme for the calendar using our color scheme
-const customTheme = {
-  level0: 'var(--color-cream-900)',
-  level1: 'var(--color-aqua-100)',
-  level2: 'var(--color-aqua-500)',
-  level3: 'var(--color-teal-800)',
-  level4: 'var(--color-navy-900)',
-};
+
 
 export default function DashboardHome() {
   const { data: session } = useSession();
@@ -154,19 +147,7 @@ export default function DashboardHome() {
   }, [session?.user?.id]);
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center space-y-4"
-        >
-          <PacmanLoader color="#538B81" size={20} />
-          <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
-        </motion.div>
-      </div>
-    );
+    return <FullPageLoader message="Loading your study dashboard..." />;
   }
 
   const totalStudyHours = Object.values(stats.studySessions).reduce(
@@ -178,8 +159,41 @@ export default function DashboardHome() {
   const weeklyProgress = (totalStudyHours / weeklyGoal) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 lg:px-12">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative overflow-hidden"
+    >
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            rotate: [360, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute -bottom-32 -left-32 w-96 h-96 bg-gradient-to-br from-secondary/5 to-primary/5 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="relative z-10 space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 lg:px-12">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -271,24 +285,48 @@ export default function DashboardHome() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
           className="grid gap-6 lg:grid-cols-3"
         >
-          <Card className="lg:col-span-2 bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
-            <CardHeader className="pb-3">
+          <GlassCard className="lg:col-span-2 backdrop-blur-xl">
+            <div className="p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" />
-                  Study Activity
-                </CardTitle>
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                  Last 365 days
-                </Badge>
+                  Study Activity Heatmap
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    Last 365 days
+                  </Badge>
+                  <TrendIndicator value={8} label="consistency" size="sm" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="w-full overflow-x-auto">
-                <div className="min-w-[280px] p-4 md:min-w-full">
+
+              {/* Activity Summary */}
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Most Active</p>
+                  <p className="text-sm font-semibold">Monday</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Longest Streak</p>
+                  <p className="text-sm font-semibold">{stats.bestStreak} days</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Total Sessions</p>
+                  <p className="text-sm font-semibold">
+                    {Object.values(stats.studySessions).reduce((total: number, session: DailySession) => total + (session.count || 0), 0)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Avg/Week</p>
+                  <p className="text-sm font-semibold">{Math.round(totalStudyHours / 52 * 10) / 10}h</p>
+                </div>
+              </div>
+
+              <div className="w-full overflow-x-auto bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl p-4">
+                <div className="min-w-[280px] md:min-w-full">
                   <ContributionCalendar
                     data={studyData}
                     dateOptions={{
@@ -299,7 +337,13 @@ export default function DashboardHome() {
                       includeBoundary: true,
                     }}
                     styleOptions={{
-                      theme: customTheme,
+                      theme: {
+                        level0: 'rgba(163, 211, 205, 0.1)',
+                        level1: 'rgba(163, 211, 205, 0.3)',
+                        level2: 'rgba(83, 139, 129, 0.6)',
+                        level3: 'rgba(73, 125, 116, 0.8)',
+                        level4: 'rgba(39, 68, 93, 1)',
+                      },
                       cx: isMobile ? 8 : isTablet ? 12 : 18,
                       cy: isMobile ? 10 : isTablet ? 14 : 20,
                       cr: isMobile ? 2.5 : isTablet ? 3.5 : 4,
@@ -310,7 +354,7 @@ export default function DashboardHome() {
                       hideMonthLabels: isMobile,
                       hideDayLabels: isMobile,
                     }}
-                    onCellClick={(e: any) => {
+                    onCellClick={(e: React.MouseEvent<HTMLElement>) => {
                       const cellData = JSON.parse(e.currentTarget.getAttribute('data-cell') || '{}');
                       if (cellData?.data?.count) {
                         console.log(`${cellData.data.details}`);
@@ -320,113 +364,224 @@ export default function DashboardHome() {
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Weekly Goal
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-medium">{Math.round(weeklyProgress)}%</span>
+              {/* Legend */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Less</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(163, 211, 205, 0.1)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(163, 211, 205, 0.3)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(83, 139, 129, 0.6)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(73, 125, 116, 0.8)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(39, 68, 93, 1)' }}></div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(weeklyProgress, 100)}%` }}
-                    transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {Math.round(totalStudyHours)} of {weeklyGoal} hours this week
-                </p>
+                <span className="text-muted-foreground">More</span>
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="backdrop-blur-xl">
+            <div className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Weekly Goal
+                </h3>
+                <TrendIndicator value={12} label="vs last week" size="sm" />
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Study Sessions</span>
+              {/* Progress Ring */}
+              <div className="flex items-center justify-center">
+                <ProgressRing
+                  progress={Math.min(weeklyProgress, 100)}
+                  size={140}
+                  strokeWidth={12}
+                  color="var(--color-teal-600)"
+                  backgroundColor="var(--color-cream-200)"
+                >
+                  <div className="text-center">
+                    <AnimatedCounter
+                      value={Math.round(weeklyProgress)}
+                      suffix="%"
+                      className="text-2xl font-bold text-card-foreground"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">complete</p>
                   </div>
-                  <span className="text-sm font-bold">
-                    {Object.values(stats.studySessions).reduce((total: number, session: any) => total + (session.count || 0), 0)}
+                </ProgressRing>
+              </div>
+
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  <AnimatedCounter value={Math.round(totalStudyHours)} className="font-semibold text-card-foreground" /> 
+                  {' '}of {weeklyGoal} hours this week
+                </p>
+                <div className="flex justify-center gap-4 text-xs">
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-teal-600"></div>
+                    Completed
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-muted"></div>
+                    Remaining
                   </span>
                 </div>
+              </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Active Days</span>
-                  </div>
-                  <span className="text-sm font-bold">{stats.totalDays}</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20">
+                  <BookOpen className="h-4 w-4 text-blue-600 mb-1" />
+                  <span className="text-xs text-muted-foreground">Sessions</span>
+                  <AnimatedCounter
+                    value={Object.values(stats.studySessions).reduce((total: number, session: any) => total + (session.count || 0), 0)}
+                    className="text-sm font-bold text-card-foreground"
+                  />
+                </div>
+
+                <div className="flex flex-col items-center p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20">
+                  <Activity className="h-4 w-4 text-green-600 mb-1" />
+                  <span className="text-xs text-muted-foreground">Active Days</span>
+                  <AnimatedCounter
+                    value={stats.totalDays}
+                    className="text-sm font-bold text-card-foreground"
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         </motion.div>
 
         {/* Achievements Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
         >
-          <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-card-foreground flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
-                Recent Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <GlassCard className="backdrop-blur-xl">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                  <Award className="h-5 w-5 text-primary" />
+                  Recent Achievements
+                </h3>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  {[
+                    stats.currentStreak >= 7,
+                    totalStudyHours >= 50,
+                    stats.totalDays >= 30,
+                    stats.bestStreak >= 14
+                  ].filter(Boolean).length} earned
+                </Badge>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {stats.currentStreak >= 7 && (
-                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
-                    <div className="p-2 bg-yellow-500/20 rounded-full">
-                      <Award className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Week Warrior</p>
-                      <p className="text-xs text-muted-foreground">7+ day streak</p>
-                    </div>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
+                    className="group relative overflow-hidden"
+                  >
+                    <GlassCard className="p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30 hover:border-yellow-500/50 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-yellow-500/30 rounded-full group-hover:scale-110 transition-transform duration-300">
+                          <Award className="h-4 w-4 text-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Week Warrior</p>
+                          <p className="text-xs text-muted-foreground">7+ day streak achieved</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
                 )}
                 
                 {totalStudyHours >= 50 && (
-                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                    <div className="p-2 bg-blue-500/20 rounded-full">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Time Master</p>
-                      <p className="text-xs text-muted-foreground">50+ hours studied</p>
-                    </div>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    className="group relative overflow-hidden"
+                  >
+                    <GlassCard className="p-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-500/50 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/30 rounded-full group-hover:scale-110 transition-transform duration-300">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Time Master</p>
+                          <p className="text-xs text-muted-foreground">50+ hours completed</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
                 )}
 
                 {stats.totalDays >= 30 && (
-                  <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                    <div className="p-2 bg-green-500/20 rounded-full">
-                      <Calendar className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Monthly Champion</p>
-                      <p className="text-xs text-muted-foreground">30+ study days</p>
-                    </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6, duration: 0.3 }}
+                    className="group relative overflow-hidden"
+                  >
+                    <GlassCard className="p-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30 hover:border-green-500/50 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-500/30 rounded-full group-hover:scale-110 transition-transform duration-300">
+                          <Calendar className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Monthly Champion</p>
+                          <p className="text-xs text-muted-foreground">30+ active study days</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                )}
+
+                {stats.bestStreak >= 14 && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.7, duration: 0.3 }}
+                    className="group relative overflow-hidden"
+                  >
+                    <GlassCard className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30 hover:border-purple-500/50 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-500/30 rounded-full group-hover:scale-110 transition-transform duration-300">
+                          <Zap className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Streak Legend</p>
+                          <p className="text-xs text-muted-foreground">14+ day streak mastery</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                )}
+
+                {/* Add motivational empty state */}
+                {[stats.currentStreak >= 7, totalStudyHours >= 50, stats.totalDays >= 30, stats.bestStreak >= 14].filter(Boolean).length === 0 && (
+                  <div className="col-span-full">
+                    <GlassCard className="p-8 text-center">
+                      <div className="space-y-3">
+                        <div className="p-3 bg-muted/20 rounded-full w-fit mx-auto">
+                          <Brain className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">Start Your Journey</p>
+                          <p className="text-xs text-muted-foreground">Complete study sessions to unlock achievements</p>
+                        </div>
+                      </div>
+                    </GlassCard>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
         </motion.div>
       </div>
-    </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
+    </motion.div>
   );
 }
