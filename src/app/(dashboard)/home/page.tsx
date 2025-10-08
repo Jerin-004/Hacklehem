@@ -206,7 +206,7 @@ export default function DashboardHome() {
               Welcome back{session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}! 👋
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base">
-              Here's your learning journey overview
+              Here&apos;s your learning journey overview
             </p>
           </div>
           <motion.div

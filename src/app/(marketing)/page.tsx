@@ -2,21 +2,17 @@
 
 import { motion } from 'framer-motion'
 import { 
-  BookOpen, 
   Brain, 
   Clock, 
   ArrowRight, 
-  CheckCircle, 
   Star,
   Target,
   TrendingUp,
   Users,
-  Zap,
   Shield,
   Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/ui/glass-card'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
@@ -208,7 +204,7 @@ export default function Page() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto"
             >
-              {stats.map((stat, index) => (
+              {stats.map((stat) => (
                 <GlassCard key={stat.label} className="p-6 text-center">
                   <div className="text-3xl font-bold text-foreground mb-2">
                     <AnimatedCounter 
@@ -307,7 +303,7 @@ export default function Page() {
                     ))}
                   </div>
                   <blockquote className="text-lg mb-6 leading-relaxed">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </blockquote>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-semibold">

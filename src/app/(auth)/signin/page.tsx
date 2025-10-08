@@ -89,7 +89,7 @@ export default function SignInPage() {
             </p>
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg mb-4">What you'll get:</h3>
+              <h3 className="font-semibold text-lg mb-4">What you&apos;ll get:</h3>
               {benefits.map((benefit, index) => (
                 <motion.div
                   key={benefit.text}
@@ -153,7 +153,7 @@ export default function SignInPage() {
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link 
                     href="/register" 
                     className="font-medium text-primary hover:text-primary/80 transition-colors"

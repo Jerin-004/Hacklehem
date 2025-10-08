@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { PaginationNav } from "@/components/ui/pagination-nav";
+import { Search, BookOpen, Sparkles, TrendingUp } from "lucide-react";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -152,58 +153,145 @@ export default function ResourcesPage() {
   const currentResources = storedResources.slice(startIndex, endIndex);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Resource Curator</h1>
-        <div className="flex items-center">
-          <span className="text-xs sm:text-sm text-gray-600">Find and manage learning resources</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+      {/* Professional Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-700/90" />
+        
+        <div className="relative p-8 md:p-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Search className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                    Resource Curator
+                  </h1>
+                  <p className="text-blue-100 text-lg mt-2">
+                    AI-powered learning resource discovery
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold">{storedResources.length}</p>
+                  <p className="text-sm text-blue-100">Resources</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold">AI</p>
+                  <p className="text-sm text-blue-100">Powered</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold">Smart</p>
+                  <p className="text-sm text-blue-100">Curation</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold">Pro</p>
+                  <p className="text-sm text-blue-100">Features</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="w-full max-w-10xl mx-auto">
-        <ResourceCurator onCreateResources={handleCreateResources} />
+
+      {/* Main Content */}
+      <div className="relative p-8 -mt-8">
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl p-8">
+          <ResourceCurator onCreateResources={handleCreateResources} />
+        </div>
       </div>
 
       {/* Stored Resources Section */}
-      {loading ? (
-        <div className="mt-8 sm:mt-12">
-          <Separator className="my-6 sm:my-8" />
-          <Skeleton className="h-6 sm:h-8 w-36 sm:w-48 mb-4 sm:mb-6" />
-          <div className="space-y-4 sm:space-y-6">
-            <Skeleton className="h-[150px] sm:h-[200px] w-full" />
-            <Skeleton className="h-[150px] sm:h-[200px] w-full" />
-          </div>
-        </div>
-      ) : (
-        <div id="stored-resources" className="mt-8 sm:mt-12">
-          <Separator className="my-6 sm:my-8" />
-          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Your Curated Resources</h2>
-          {storedResources.length > 0 ? (
-            <>
-              <div className="space-y-4 sm:space-y-6">
-                {currentResources.map((resource) => (
-                  <StoredResources
-                    key={resource._id}
-                    resource={resource}
-                    onDelete={handleResourceDelete}
-                  />
-                ))}
-              </div>
-              {totalPages > 1 && (
-                <PaginationNav
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              )}
-            </>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>You haven&apos;t curated any resources yet.</p>
-              <p className="mt-2">Use the form above to get personalized learning resources!</p>
+      <div className="p-8 mt-8">
+        {loading ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-8 w-48" />
             </div>
-          )}
-        </div>
-      )}
+            <div className="space-y-6">
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+            </div>
+          </div>
+        ) : (
+          <div id="stored-resources" className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Your Learning Library</h2>
+                  <p className="text-gray-600">Curated resources tailored for your success</p>
+                </div>
+              </div>
+              
+              {storedResources.length > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-700">
+                    {storedResources.length} Resource{storedResources.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {storedResources.length > 0 ? (
+              <>
+                <div className="space-y-6">
+                  {currentResources.map((resource, index) => (
+                    <div key={resource._id} className="group">
+                      <StoredResources
+                        resource={resource}
+                        onDelete={handleResourceDelete}
+                      />
+                      {index < currentResources.length - 1 && (
+                        <Separator className="mt-6 opacity-30" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="mt-8 pt-8 border-t border-gray-200">
+                    <PaginationNav
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-16">
+                <div className="flex justify-center mb-6">
+                  <div className="p-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
+                    <Search className="h-12 w-12 text-gray-400" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Resources Yet
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Start building your personalized learning library with AI-curated resources 
+                  tailored to your study goals.
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Use the curator above to get started</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
