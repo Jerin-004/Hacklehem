@@ -5,6 +5,11 @@ import { motion } from 'framer-motion';
 import { ContributionCalendar } from 'react-contribution-calendar';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StatCard } from "@/components/ui/stat-card";
+import { ProgressRing } from "@/components/ui/progress-ring";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { GlassCard } from "@/components/ui/glass-card";
+import { TrendIndicator } from "@/components/ui/trend-indicator";
 import { useSession } from 'next-auth/react';
 import PacmanLoader from 'react-spinners/PacmanLoader';
 import { 
@@ -15,7 +20,9 @@ import {
   Award,
   BookOpen,
   BarChart3,
-  Activity
+  Activity,
+  Brain,
+  Zap
 } from 'lucide-react';
 
 interface StudySession {
@@ -202,72 +209,63 @@ export default function DashboardHome() {
         </motion.div>
 
         {/* Quick Stats Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.6 }}
-          className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-muted-foreground font-medium text-sm">Current Streak</p>
-                  <p className="text-3xl font-bold text-card-foreground">{stats.currentStreak}</p>
-                  <p className="text-xs text-muted-foreground">days</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-xl">
-                  <Target className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Current Streak"
+            value={<AnimatedCounter value={stats.currentStreak} />}
+            subtitle="days"
+            icon={Target}
+            gradient="from-orange-500/20 to-orange-600/20"
+            trend={{
+              value: stats.currentStreak > 0 ? 15 : 0,
+              label: "vs last week",
+              isPositive: stats.currentStreak > 0
+            }}
+            delay={0.1}
+          />
 
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-muted-foreground font-medium text-sm">Total Hours</p>
-                  <p className="text-3xl font-bold text-card-foreground">{Math.round(totalStudyHours)}</p>
-                  <p className="text-xs text-muted-foreground">hours studied</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl">
-                  <Clock className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Total Hours"
+            value={<AnimatedCounter value={Math.round(totalStudyHours)} />}
+            subtitle="hours studied"
+            icon={Clock}
+            gradient="from-blue-500/20 to-blue-600/20"
+            trend={{
+              value: 8,
+              label: "this month",
+              isPositive: true
+            }}
+            delay={0.2}
+          />
 
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-muted-foreground font-medium text-sm">Study Days</p>
-                  <p className="text-3xl font-bold text-card-foreground">{stats.totalDays}</p>
-                  <p className="text-xs text-muted-foreground">total days</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl">
-                  <Calendar className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Study Days"
+            value={<AnimatedCounter value={stats.totalDays} />}
+            subtitle="total days"
+            icon={Calendar}
+            gradient="from-green-500/20 to-green-600/20"
+            trend={{
+              value: 12,
+              label: "active days",
+              isPositive: true
+            }}
+            delay={0.3}
+          />
 
-          <Card className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 border border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-muted-foreground font-medium text-sm">Best Streak</p>
-                  <p className="text-3xl font-bold text-card-foreground">{stats.bestStreak}</p>
-                  <p className="text-xs text-muted-foreground">days</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl">
-                  <Award className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+          <StatCard
+            title="Best Streak"
+            value={<AnimatedCounter value={stats.bestStreak} />}
+            subtitle="days"
+            icon={Award}
+            gradient="from-purple-500/20 to-purple-600/20"
+            trend={{
+              value: stats.bestStreak > stats.currentStreak ? 0 : 5,
+              label: "personal best",
+              isPositive: stats.bestStreak <= stats.currentStreak
+            }}
+            delay={0.4}
+          />
+        </div>
 
         {/* Weekly Progress */}
         <motion.div
